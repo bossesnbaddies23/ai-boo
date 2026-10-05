@@ -1,16 +1,16 @@
-# AI Boo — Open Source AI Identity Platform
+# Bosses & Baddies Platform
 
-A fully open-source, self-hosted platform for creating a personalized AI companion experience.
+A fully open-source creator voting and battling platform with integrated AI assistant.
 
 ## Features
-- Dual profile system for user + AI identity
-- Premium tier gating
-- Local AI backend
-- Motion state switching
-- Memory persistence
-- Portable setup for USB or local machine
+- Creator swipe voting (Bosses & Baddies categories)
+- AI Boo voice assistant with text-to-speech
+- 7-day free trial system
+- Premium subscription monetization
+- Podcast, Merch, and Upgrade integrations
+- Battle percentages and creator stats
 
-## Start locally
+## Quick Start
 
 ```bash
 npm install
@@ -18,12 +18,27 @@ npm run build
 npm start
 ```
 
-Then open: http://localhost:3000
+Open: http://localhost:3000
 
-## Notes
-- All profile and chat memory is saved locally in `data/user-memory.json`
-- This project is built to be transparent and open-source by design
-- No dependency on a vendor-specific laptop or external service
+## Deployment
+
+Deploy to bossesbaddies.com:
+
+```bash
+# Build
+npm run build
+
+# Deploy to your hosting (Render, Vercel, etc.)
+```
+
+## API Endpoints
+
+- `GET /api/creators/:category` - Get creators by category
+- `POST /api/vote` - Vote on a creator
+- `POST /api/ai-chat` - Chat with AI Boo
+- `GET /api/memory/:userId` - Get user data
+- `POST /api/upgrade` - Upgrade subscription
 
 ## License
-MIT
+
+MIT - Fully Open Source

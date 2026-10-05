@@ -39,6 +39,13 @@ const messages = [
   { id: 3, sender: "ai", text: "Absolutely. Your AI identity can grow with your brand, memory, and premium upgrades." },
 ];
 
+const memorySegments = [
+  { label: "Identity", value: "Velora / AI Boo brand system" },
+  { label: "Style", value: "Fierce, glam, premium movement" },
+  { label: "User Prefs", value: "Custom voice and motion tuning" },
+  { label: "Support", value: "Premium behavior and loyalty path" },
+];
+
 export default function App() {
   const [activeTab, setActiveTab] = useState("Overview");
   const [selectedPlan, setSelectedPlan] = useState("Unchained");
@@ -47,9 +54,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col">
+      <div className="mx-auto flex min-h-screen max-w-[1700px] flex-col">
         <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur">
-          <div className="mx-auto flex max-w-[1600px] items-center justify-between px-5 py-4">
+          <div className="mx-auto flex max-w-[1700px] items-center justify-between px-5 py-4">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-r from-fuchsia-500 to-cyan-400 font-black text-slate-950">
                 A
@@ -125,7 +132,7 @@ export default function App() {
                   </div>
                   <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
                     <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                   Online
+                    Online
                   </span>
                 </div>
 
@@ -248,8 +255,13 @@ export default function App() {
 
               <div className="rounded-[2rem] border border-slate-800 bg-slate-900 p-5">
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Identity memory</p>
-                <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950 p-4 text-sm leading-7 text-slate-300">
-                  Velora keeps your identity, premium state, and user preferences in a persistent local profile while remaining open-source and owner-controlled.
+                <div className="mt-4 grid gap-3">
+                  {memorySegments.map((segment) => (
+                    <div key={segment.label} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">{segment.label}</p>
+                      <p className="mt-2 text-sm text-slate-200">{segment.value}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </section>

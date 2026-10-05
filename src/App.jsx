@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const tabs = ["Overview", "Identity", "Motion", "Plans", "Support"];
+const tabs = ["Overview", "Profiles", "Motion", "Plans", "Support"];
 const motions = ["Idle", "Speak", "Walk Left", "Walk Right", "Point", "Look Up", "Look Down"];
+const genders = ["she/her", "he/him", "they/them", "custom"];
+const personalityOptions = ["friendly", "professional", "playful", "fierce", "mysterious"];
 const premiumFeatures = [
-  "Priority AI memory",
+  "Personalized AI addressing",
+  "Custom identity memory",
   "Premium avatar upgrades",
   "Custom personality tuning",
   "QR share and profile setup",
   "Advanced support",
-  "Contest access",
 ];
 
 const plans = [
@@ -33,13 +35,6 @@ const plans = [
   },
 ];
 
-const memorySegments = [
-  { label: "Identity", value: "Velora / AI Boo brand system" },
-  { label: "Style", value: "Fierce, glam, premium movement" },
-  { label: "User Prefs", value: "Custom voice and motion tuning" },
-  { label: "Support", value: "Premium behavior and loyalty path" },
-];
-
 export default function App() {
   const [activeTab, setActiveTab] = useState("Overview");
   const [selectedPlan, setSelectedPlan] = useState("Unchained");
@@ -48,7 +43,22 @@ export default function App() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [memory, setMemory] = useState(null);
+  const [showProfileEditor, setShowProfileEditor] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const [userProfile, setUserProfile] = useState({
+    name: "Friend",
+    pronouns: "they/them",
+    howToAddress: "Hey there",
+  });
+
+  const [aiProfile, setAiProfile] = useState({
+    name: "Velora",
+    gender: "she/her",
+    personality: "friendly",
+    whatToCall: "darling",
+    style: "glam and fierce",
+  });
 
   useEffect(() => {
     fetchUserMemory();
@@ -63,15 +73,47 @@ export default function App() {
       const res = await fetch("/api/memory/default");
       const data = await res.json();
       setMemory(data);
+      setUserProfile(data.userProfile || userProfile);
+      setAiProfile(data.aiProfile || aiProfile);
       if (data.conversationHistory && data.conversationHistory.length > 0) {
-        const convertedMessages = data.conversationHistory.map((item, idx) => [
-          { id: idx * 2, sender: "user", text: item.userMessage },
-          { id: idx * 2 + 1, sender: "ai", text: item.aiResponse },
-        ]).flat();
+        const convertedMessages = data.conversationHistory
+          .map((item, idx) => [
+            { id: idx * 2, sender: "user", text: item.userMessage },
+            { id: idx * 2 + 1, sender: "ai", text: item.aiResponse },
+          ])
+          .flat();
         setMessages(convertedMessages);
       }
     } catch (e) {
       console.error("Error loading memory:", e);
+    }
+  };
+
+  const saveUserProfile = async () => {
+    try {
+      await fetch("/api/profile/user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: "default", ...userProfile }),
+      });
+      fetchUserMemory();
+      alert("User profile saved!");
+    } catch (e) {
+      console.error("Error saving profile:", e);
+    }
+  };
+
+  const saveAiProfile = async () => {
+    try {
+      await fetch("/api/profile/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: "default", ...aiProfile }),
+      });
+      fetchUserMemory();
+      alert("AI profile saved!");
+    } catch (e) {
+      console.error("Error saving AI profile:", e);
     }
   };
 
@@ -201,6 +243,7 @@ export default function App() {
                 ].map((item) => (
                   <button
                     key={item}
+                    onClick={() => item === "Profiles" && setShowProfileEditor(!showProfileEditor)}
                     className="flex w-full items-center justify-between rounded-2xl border border-slate-800 bg-slate-900/80 px-3 py-3 text-left text-sm text-slate-200 hover:border-slate-700"
                   >
                     <span>{item}</span>
@@ -211,22 +254,134 @@ export default function App() {
 
               <div className="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Current mode</p>
-                <p className="mt-2 text-xl font-black text-cyan-300">Velora</p>
+                <p className="mt-2 text-xl font-black text-cyan-300">{aiProfile.name}</p>
                 <p className="mt-1 text-sm text-slate-400">{selectedPlan} active</p>
                 {memory && (
-                  <p className="mt-2 text-xs text-slate-500">Conversations: {memory.conversationHistory?.length || 0}</p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Conversations: {memory.conversationHistory?.length || 0}
+                  </p>
                 )}
               </div>
             </div>
           </aside>
 
           <main className="flex-1 p-5 md:p-7">
+            {showProfileEditor && (
+              <section className="mb-8 grid gap-6 rounded-[2rem] border border-slate-800 bg-slate-900 p-6 lg:grid-cols-2">
+                <div>
+                  <h3 className="mb-6 text-2xl font-black">Your Profile</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs uppercase tracking-[0.2em] text-slate-400">Your Name</label>
+                      <input
+                        type="text"
+                        value={userProfile.name}
+                        onChange={(e) => setUserProfile({ ...userProfile, name: e.target.value })}
+                        className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs uppercase tracking-[0.2em] text-slate-400">Your Pronouns</label>
+                      <input
+                        type="text"
+                        value={userProfile.pronouns}
+                        onChange={(e) => setUserProfile({ ...userProfile, pronouns: e.target.value })}
+                        className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs uppercase tracking-[0.2em] text-slate-400">How to Address You</label>
+                      <input
+                        type="text"
+                        value={userProfile.howToAddress}
+                        onChange={(e) => setUserProfile({ ...userProfile, howToAddress: e.target.value })}
+                        className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                      />
+                    </div>
+                    <button
+                      onClick={saveUserProfile}
+                      className="mt-4 w-full rounded-2xl bg-gradient-to-r from-fuchsia-500 to-cyan-400 px-4 py-3 text-sm font-bold text-slate-950"
+                    >
+                      Save Your Profile
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="mb-6 text-2xl font-black">AI {aiProfile.name}'s Profile</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs uppercase tracking-[0.2em] text-slate-400">AI Name</label>
+                      <input
+                        type="text"
+                        value={aiProfile.name}
+                        onChange={(e) => setAiProfile({ ...aiProfile, name: e.target.value })}
+                        className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs uppercase tracking-[0.2em] text-slate-400">Gender / Pronouns</label>
+                      <select
+                        value={aiProfile.gender}
+                        onChange={(e) => setAiProfile({ ...aiProfile, gender: e.target.value })}
+                        className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                      >
+                        {genders.map((g) => (
+                          <option key={g} value={g}>
+                            {g}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs uppercase tracking-[0.2em] text-slate-400">Personality</label>
+                      <select
+                        value={aiProfile.personality}
+                        onChange={(e) => setAiProfile({ ...aiProfile, personality: e.target.value })}
+                        className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                      >
+                        {personalityOptions.map((p) => (
+                          <option key={p} value={p}>
+                            {p}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs uppercase tracking-[0.2em] text-slate-400">What She Calls You</label>
+                      <input
+                        type="text"
+                        value={aiProfile.whatToCall}
+                        onChange={(e) => setAiProfile({ ...aiProfile, whatToCall: e.target.value })}
+                        className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs uppercase tracking-[0.2em] text-slate-400">Style</label>
+                      <input
+                        type="text"
+                        value={aiProfile.style}
+                        onChange={(e) => setAiProfile({ ...aiProfile, style: e.target.value })}
+                        className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                      />
+                    </div>
+                    <button
+                      onClick={saveAiProfile}
+                      className="mt-4 w-full rounded-2xl bg-gradient-to-r from-fuchsia-500 to-cyan-400 px-4 py-3 text-sm font-bold text-slate-950"
+                    >
+                      Save AI Profile
+                    </button>
+                  </div>
+                </div>
+              </section>
+            )}
+
             <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
               <section className="rounded-[2rem] border border-slate-800 bg-slate-900 p-5 shadow-2xl shadow-fuchsia-500/5">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Live identity</p>
-                    <h2 className="mt-2 text-3xl font-black">Velora Avatar Stage</h2>
+                    <h2 className="mt-2 text-3xl font-black">{aiProfile.name} Avatar Stage</h2>
                   </div>
                   <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
                     <span className="h-2 w-2 rounded-full bg-emerald-400" />
@@ -237,16 +392,20 @@ export default function App() {
                 <div className="mt-6 rounded-[1.75rem] border border-slate-800 bg-[radial-gradient(circle_at_center,_rgba(34,211,238,0.18),transparent_28%),radial-gradient(circle_at_top,_rgba(217,70,239,0.2),transparent_35%),#020617] p-5">
                   <div className="flex h-[420px] items-center justify-center overflow-hidden rounded-[1.5rem] border border-slate-800 bg-slate-950/60">
                     <div className="relative flex h-52 w-52 items-center justify-center">
-                      <div className={`absolute h-28 w-28 rounded-full border-2 border-fuchsia-500/70 bg-gradient-to-br from-white/10 to-fuchsia-500/30 transition-all ${
-                        motion === "Speak" ? "animate-pulse" : ""
-                      }`} />
+                      <div
+                        className={`absolute h-28 w-28 rounded-full border-2 border-fuchsia-500/70 bg-gradient-to-br from-white/10 to-fuchsia-500/30 transition-all ${
+                          motion === "Speak" ? "animate-pulse" : ""
+                        }`}
+                      />
                       <div className="absolute top-8 flex gap-5">
                         <div className="h-3.5 w-3.5 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.9)]" />
                         <div className="h-3.5 w-3.5 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.9)]" />
                       </div>
-                      <div className={`absolute bottom-14 h-14 w-24 rounded-full border-4 border-white/70 transition ${
-                        motion === "Speak" ? "scale-110" : "scale-100"
-                      }`} />
+                      <div
+                        className={`absolute bottom-14 h-14 w-24 rounded-full border-4 border-white/70 transition ${
+                          motion === "Speak" ? "scale-110" : "scale-100"
+                        }`}
+                      />
                       <div className="absolute bottom-2 h-24 w-20 rounded-[40%] border-4 border-fuchsia-300/60" />
                       <div className="absolute left-8 bottom-[-8px] h-12 w-4 rounded-full bg-slate-800" />
                       <div className="absolute right-8 bottom-[-8px] h-12 w-4 rounded-full bg-slate-800" />
@@ -297,7 +456,7 @@ export default function App() {
                   ))}
                   {loading && (
                     <div className="flex gap-2 text-sm text-slate-400">
-                      <span>Velora is thinking</span>
+                      <span>{aiProfile.name} is thinking</span>
                       <span className="animate-bounce">.</span>
                       <span className="animate-bounce" style={{ animationDelay: "0.1s" }}>.</span>
                       <span className="animate-bounce" style={{ animationDelay: "0.2s" }}>.</span>
@@ -311,7 +470,7 @@ export default function App() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
-                    placeholder="Ask your AI identity..."
+                    placeholder={`Ask ${aiProfile.name}...`}
                     disabled={loading}
                     className="h-[100px] w-full resize-none rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white placeholder-slate-400 focus:border-cyan-500 focus:outline-none disabled:opacity-50"
                   />
@@ -374,14 +533,16 @@ export default function App() {
               </div>
 
               <div className="rounded-[2rem] border border-slate-800 bg-slate-900 p-5">
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Identity memory</p>
-                <div className="mt-4 grid gap-3">
-                  {memorySegments.map((segment) => (
-                    <div key={segment.label} className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">{segment.label}</p>
-                      <p className="mt-2 text-sm text-slate-200">{segment.value}</p>
-                    </div>
-                  ))}
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Your Setup</p>
+                <div className="mt-4 space-y-3 text-sm text-slate-300">
+                  <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+                    <p className="font-bold text-cyan-300">You: {userProfile.name}</p>
+                    <p className="text-xs text-slate-500">{userProfile.pronouns}</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-800 bg-slate-950 p-4">
+                    <p className="font-bold text-fuchsia-300">{aiProfile.name}</p>
+                    <p className="text-xs text-slate-500">{aiProfile.gender} • {aiProfile.personality}</p>
+                  </div>
                 </div>
               </div>
             </section>

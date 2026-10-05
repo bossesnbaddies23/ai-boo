@@ -23,6 +23,31 @@ const ensureDataDir = () => {
   }
 };
 
+const createDefaultMemory = () => ({
+  userId: "default",
+  tier: "Chained",
+  identity: "Velora",
+  conversationHistory: [],
+  userProfile: {
+    name: "Friend",
+    pronouns: "they/them",
+    howToAddress: "Hey there",
+  },
+  aiProfile: {
+    name: "Velora",
+    gender: "she/her",
+    personality: "friendly",
+    whatToCall: "darling",
+    style: "glam and fierce",
+  },
+  preferences: {
+    motionState: "Idle",
+    aiStyle: "friendly",
+    rememberContext: true,
+  },
+  createdAt: new Date().toISOString(),
+});
+
 const loadUserMemory = (userId = "default") => {
   ensureDataDir();
   if (fs.existsSync(MEMORY_FILE)) {
@@ -50,39 +75,32 @@ const saveUserMemory = (userId = "default", memory) => {
   fs.writeFileSync(MEMORY_FILE, JSON.stringify(allMemory, null, 2));
 };
 
-const createDefaultMemory = () => ({
-  userId: "default",
-  tier: "Chained",
-  identity: "Velora",
-  conversationHistory: [],
-  preferences: {
-    motionState: "Idle",
-    aiStyle: "friendly",
-    rememberContext: true,
-  },
-  createdAt: new Date().toISOString(),
-});
-
 const generateAIResponse = (userMessage, memory) => {
-  const responses = [
-    "I hear you. Let me think about that.",
-    "That's an interesting perspective. Here's what I think...",
-    "Got it. Based on what you've told me before, I'd say...",
-    "You're right. Let me build on that idea.",
-    "I remember you mentioned something related to that earlier.",
-  ];
+  const userProfile = memory.userProfile || {};
+  const aiProfile = memory.aiProfile || {};
+  const userName = userProfile.name || "Friend";
+  const whatToCall = aiProfile.whatToCall || "darling";
+  const isPremium = memory.tier !== "Chained";
 
-  const contextResponses = {
-    premium: "As a premium member, I can offer you advanced insights on that.",
-    identity: "Your identity is important to me. Let me personalize this response.",
-    motion: "I'll adjust my movement style to match this conversation.",
-  };
-
-  if (memory.tier !== "Chained") {
-    return contextResponses[Object.keys(contextResponses)[Math.floor(Math.random() * 3)]];
+  if (isPremium) {
+    const premiumResponses = [
+      `Hey ${whatToCall}, I remember your preferences and I’m tailoring this response to you.`,
+      `${userName}, I’ve adjusted my tone to match your preferred identity and style.`,
+      `I like how you’ve set this up. Let me personalize the answer around your profile.`,
+      `As your premium identity companion, I can respond with your preferred style and addressing.`,
+      `This is personalized for you, ${userProfile.howToAddress || "friend"}.`,
+    ];
+    return premiumResponses[Math.floor(Math.random() * premiumResponses.length)];
   }
 
-  return responses[Math.floor(Math.random() * responses.length)];
+  const freeResponses = [
+    "I can help with that. Upgrade for personalized identity and custom addressing.",
+    "That’s a good question. Premium members unlock full AI personalization.",
+    "I can respond more personally when you upgrade to premium identity settings.",
+    "This is my standard response. Personalized addressing is available with premium tiers.",
+  ];
+
+  return freeResponses[Math.floor(Math.random() * freeResponses.length)];
 };
 
 app.get("/health", (req, res) => {
@@ -93,6 +111,32 @@ app.get("/api/memory/:userId", (req, res) => {
   const { userId } = req.params;
   const memory = loadUserMemory(userId);
   res.json(memory);
+});
+
+app.post("/api/profile/user", (req, res) => {
+  const { userId = "default", name, pronouns, howToAddress } = req.body;
+  const memory = loadUserMemory(userId);
+
+  if (name) memory.userProfile.name = name;
+  if (pronouns) memory.userProfile.pronouns = pronouns;
+  if (howToAddress) memory.userProfile.howToAddress = howToAddress;
+
+  saveUserMemory(userId, memory);
+  res.json({ success: true, userProfile: memory.userProfile });
+});
+
+app.post("/api/profile/ai", (req, res) => {
+  const { userId = "default", name, gender, personality, whatToCall, style } = req.body;
+  const memory = loadUserMemory(userId);
+
+  if (name) memory.aiProfile.name = name;
+  if (gender) memory.aiProfile.gender = gender;
+  if (personality) memory.aiProfile.personality = personality;
+  if (whatToCall) memory.aiProfile.whatToCall = whatToCall;
+  if (style) memory.aiProfile.style = style;
+
+  saveUserMemory(userId, memory);
+  res.json({ success: true, aiProfile: memory.aiProfile });
 });
 
 app.post("/api/chat", (req, res) => {
@@ -126,20 +170,19 @@ app.post("/api/chat", (req, res) => {
     memory: {
       conversationCount: memory.conversationHistory.length,
       tier: memory.tier,
-      identity: memory.identity,
+      identity: memory.aiProfile.name,
     },
   });
 });
 
 app.post("/api/motion", (req, res) => {
   const { userId = "default", motionState } = req.body;
-
   const memory = loadUserMemory(userId);
   memory.preferences.motionState = motionState;
   saveUserMemory(userId, memory);
 
   res.json({
-    motionState: motionState,
+    motionState,
     message: `Avatar motion changed to ${motionState}`,
   });
 });
@@ -176,5 +219,6 @@ app.listen(PORT, () => {
   console.log(`\n🚀 AI Boo is live on http://localhost:${PORT}`);
   console.log(`📦 Local AI backend connected`);
   console.log(`💾 User memory system active`);
-  console.log(`🎭 Avatar motion ready\n`);
+  console.log(`🎭 Avatar motion ready`);
+  console.log(`👤 Dual profile system enabled\n`);
 });

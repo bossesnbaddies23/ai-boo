@@ -1,44 +1,109 @@
-# Bosses & Baddies Platform
+# AI Boo Monorepo
 
-A fully open-source creator voting and battling platform with integrated AI assistant.
+A unified platform combining AI avatar experiences with subscription-based membership management.
 
-## Features
-- Creator swipe voting (Bosses & Baddies categories)
-- AI Boo voice assistant with text-to-speech
-- 7-day free trial system
-- Premium subscription monetization
-- Podcast, Merch, and Upgrade integrations
-- Battle percentages and creator stats
+## 📦 Packages
 
-## Quick Start
+### `packages/ai-boo`
+AI Avatar Platform - Personalized AI avatar with 3D/2D customization, subscription tiers, and monetization features.
 
+**Tech Stack:** React, Vite, Express, TailwindCSS
+
+**Scripts:**
+```bash
+npm run dev:ai-boo      # Start dev server
+npm run build:ai-boo    # Build for production
+npm start:ai-boo        # Run production server
+```
+
+### `packages/unchained`
+Subscription & Membership Platform - Member portal, authentication, subscription management, and financial tracking for bossesnbaddies.com.
+
+**Tech Stack:** Express, Node.js
+
+**Scripts:**
+```bash
+npm run dev:unchained      # Start dev server
+npm run build:unchained    # Build for production
+npm start:unchained        # Run production server
+```
+
+## 🚀 Getting Started
+
+### Install Dependencies
 ```bash
 npm install
-npm run build
-npm start
 ```
 
-Open: http://localhost:3000
-
-## Deployment
-
-Deploy to bossesbaddies.com:
-
+### Development
+Run both projects simultaneously:
 ```bash
-# Build
-npm run build
+# Terminal 1 - AI Boo
+npm run dev:ai-boo
 
-# Deploy to your hosting (Render, Vercel, etc.)
+# Terminal 2 - Unchained
+npm run dev:unchained
 ```
 
-## API Endpoints
+Or run individually:
+```bash
+npm run dev:ai-boo
+npm run dev:unchained
+```
 
-- `GET /api/creators/:category` - Get creators by category
-- `POST /api/vote` - Vote on a creator
-- `POST /api/ai-chat` - Chat with AI Boo
-- `GET /api/memory/:userId` - Get user data
-- `POST /api/upgrade` - Upgrade subscription
+### Production Build
+```bash
+npm run build:ai-boo
+npm run build:unchained
+```
 
-## License
+### Start Production Servers
+```bash
+npm start:ai-boo      # Runs on configured port
+npm start:unchained   # Runs on configured port
+```
 
-MIT - Fully Open Source
+## 📁 Monorepo Structure
+
+```
+ai-boo-monorepo/
+├── packages/
+│   ├── ai-boo/              # AI Avatar Platform
+│   │   ├── src/
+│   │   ├── public/
+│   │   ├── server.js
+│   │   ├── vite.config.js
+│   │   └── package.json
+│   │
+│   └── unchained/           # Membership Platform
+│       ├── src/
+│       ├── server.js
+│       └── package.json
+│
+├── .gitignore
+├── package.json             # Workspaces root
+└── README.md
+```
+
+## 🔗 Integration
+
+Both packages are now managed together:
+- **Shared dependencies** - Defined at root level
+- **Isolated environments** - Each package maintains independence
+- **Independent deployment** - Deploy either or both to production
+- **Unified versioning** - Coordinated releases via monorepo
+
+## 📝 License
+
+MIT License - Bosses N Baddies
+
+## 🤝 Contributing
+
+1. Navigate to the specific package directory
+2. Make your changes
+3. Commit to the monorepo
+4. Deploy individually or together
+
+---
+
+**🎯 Mission:** Build the ultimate AI avatar experience with seamless subscription management.

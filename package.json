@@ -1,20 +1,29 @@
 {
-  "name": "ai-boo",
-  "private": true,
+  "name": "ai-boo-monorepo",
   "version": "1.0.0",
-  "type": "module",
+  "description": "AI Boo Monorepo - AI Avatar Platform + Unchained Subscription Platform",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0",
-    "start": "node server.js"
+    "dev:ai-boo": "cd packages/ai-boo && npm run dev",
+    "dev:unchained": "cd packages/unchained && npm run dev",
+    "build:ai-boo": "cd packages/ai-boo && npm run build",
+    "build:unchained": "cd packages/unchained && npm run build",
+    "start:ai-boo": "cd packages/ai-boo && npm start",
+    "start:unchained": "cd packages/unchained && npm start",
+    "install": "npm install --workspaces"
   },
-  "dependencies": {
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  },
+  "keywords": [
+    "ai-avatar",
+    "subscription",
+    "membership",
+    "authentication",
+    "monetization"
+  ],
+  "author": "Bosses N Baddies",
+  "license": "MIT",
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.19",

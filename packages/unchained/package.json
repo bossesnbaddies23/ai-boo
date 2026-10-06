@@ -1,0 +1,23 @@
+{
+  "name": "@ai-boo/unchained",
+  "version": "1.0.0",
+  "description": "Unchained membership platform for bossesnbaddies.com",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "membership",
+    "subscription",
+    "auth",
+    "dashboard"
+  ],
+  "author": "Bosses N Baddies",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "dotenv": "^16.4.5"
+  }
+}
